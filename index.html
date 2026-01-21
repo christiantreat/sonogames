@@ -258,8 +258,7 @@
                     "C. Back Pain",
                     "D. Fracture"
                 ],
-                image: "https://images.squarespace-cdn.com/content/v1/5bc94f5b9b7d1515843688af/1616937880006-PGQRLVROBBY2CVU3A8Y7/n.png?format=2500w",
-                note: "Giant cell arteritis"
+                image: "https://images.squarespace-cdn.com/content/v1/5bc94f5b9b7d1515843688af/1616937880006-PGQRLVROBBY2CVU3A8Y7/n.png?format=2500w"
             },
             {
                 number: 5,
@@ -291,7 +290,8 @@
                     "B. Urgent - within 24 hours",
                     "C. Semi-urgent - within 1 week",
                     "D. Routine - within 2-4 weeks"
-                ]
+                ],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1627503443638-0PAZQ25A5CLFARM2BVMZ/image-asset.gif?format=500w"
             },
             {
                 number: 8,
@@ -347,17 +347,6 @@
                     "D. Free fluid"
                 ],
                 image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1609959738037-49YAZDNSYA07CI8PAFG8/image-asset.gif?format=500w"
-            },
-            {
-                number: 13,
-                stem: "Which of the following clips are not suggestive of right sided heart disease",
-                answers: [
-                    "A. [Image A]",
-                    "B. [Image B]",
-                    "C. [Image C]",
-                    "D. [Image D]"
-                ],
-                note: "Stimuli of right heart stuff"
             },
             {
                 number: 14,
@@ -481,7 +470,7 @@
             },
             {
                 number: 25,
-                stem: "You're performing a carotid Doppler study using a 7.5 MHz linear probe at a 60-degree angle. The speed of sound in tissue is 1,540 m/s. Your imaging depth is 4.2 cm. If the pulse repetition frequency (PRF) is 8,000 Hz, and you observe aliasing of blood flow in the internal carotid artery, what is the MINIMUM true peak systolic velocity of blood flow?\n\nFormula: Nyquist Limit (m/s) = (PRF × c) / (4 × f × cos θ)",
+                stem: "You're performing a carotid Doppler study using a 7.5 MHz linear probe at a 60-degree angle. The speed of sound in tissue is 1,540 m/s. Your imaging depth is 4.2 cm. If the pulse repetition frequency (PRF) is 8,000 Hz, and you observe aliasing of blood flow in the internal carotid artery, what is the MINIMUM true peak systolic velocity of blood flow?",
                 answers: [
                     "A. 0.34 m/s",
                     "B. 0.68 m/s",
@@ -544,9 +533,24 @@
                             data-type="stem"
                             placeholder="Your comments on the question...">${savedData[q.number]?.stem || ''}</textarea>
                     </div>
-
-                    <div class="answers">
                 `;
+
+                if (q.image) {
+                    html += `
+                        <div class="image-container">
+                            <img src="${q.image}" alt="Question ${q.number} image" loading="lazy">
+                        </div>
+                        <div class="comment-section">
+                            <div class="comment-label">Comment on image</div>
+                            <textarea
+                                data-question="${q.number}"
+                                data-type="image"
+                                placeholder="Your comments on the image...">${savedData[q.number]?.image || ''}</textarea>
+                        </div>
+                    `;
+                }
+
+                html += `<div class="answers">`;
 
                 q.answers.forEach((answer, index) => {
                     const answerId = `q${q.number}_a${index}`;
@@ -573,21 +577,6 @@
                             placeholder="Your comments on the answer choices...">${savedData[q.number]?.answers || ''}</textarea>
                     </div>
                 `;
-
-                if (q.image) {
-                    html += `
-                        <div class="image-container">
-                            <img src="${q.image}" alt="Question ${q.number} image" loading="lazy">
-                        </div>
-                        <div class="comment-section">
-                            <div class="comment-label">Comment on image</div>
-                            <textarea
-                                data-question="${q.number}"
-                                data-type="image"
-                                placeholder="Your comments on the image...">${savedData[q.number]?.image || ''}</textarea>
-                        </div>
-                    `;
-                }
 
                 if (q.note) {
                     html += `<div class="note">Note: ${q.note}</div>`;
