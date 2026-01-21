@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultrasound Question Bank Reviewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .question-container {
+            margin-bottom: 40px;
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .question-stem {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .question-image {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .question-image img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .answers {
+            margin: 30px 0;
+        }
+
+        .answer-option {
+            padding: 12px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #111;
+            border-left: 3px solid #444;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .comment-section {
+            margin: 40px 0;
+            padding: 30px;
+            background-color: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 4px;
+        }
+
+        .comment-section h3 {
+            font-size: 14px;
+            font-weight: 400;
+            color: #888;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        textarea::placeholder {
+            color: #555;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #333;
+        }
+
+        button {
+            padding: 12px 30px;
+            background-color: #fff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: #ddd;
+        }
+
+        button:disabled {
+            background-color: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .completion-screen h2 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        .completion-screen p {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        .email-section {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 4px;
+        }
+
+        .email-section input {
+            width: 100%;
+            padding: 12px;
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .email-section input:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        .saved-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #888;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .saved-indicator.show {
+            opacity: 1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-section {
+            margin-top: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Ultrasound Question Bank Reviewer</h1>
+            <div class="progress">
+                <span id="currentQuestion">1</span> / <span id="totalQuestions">0</span>
+            </div>
+        </div>
+
+        <div id="questionView" style="display: none;">
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-stem" id="questionStem"></div>
+
+                <div id="questionImageContainer" style="display: none;">
+                    <div class="question-image">
+                        <img id="questionImage" src="" alt="Question image">
+                    </div>
+                </div>
+
+                <div class="answers" id="answersContainer"></div>
+
+                <div id="noteContainer" style="display: none;">
+                    <div class="note" id="questionNote"></div>
+                </div>
+            </div>
+
+            <div class="comment-section">
+                <h3>Comment on Question Stem</h3>
+                <textarea id="stemComment" placeholder="Enter your comments or suggestions about the question stem..."></textarea>
+
+                <h3>Comment on Answer Choices</h3>
+                <textarea id="answersComment" placeholder="Enter your comments or suggestions about the answer choices..."></textarea>
+
+                <h3 id="imageCommentHeader" style="display: none;">Comment on Image</h3>
+                <textarea id="imageComment" style="display: none;" placeholder="Enter your comments or suggestions about the image..."></textarea>
+            </div>
+
+            <div class="navigation">
+                <button id="prevBtn" onclick="previousQuestion()">Previous</button>
+                <button id="nextBtn" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+
+        <div id="completionView" style="display: none;">
+            <div class="completion-screen">
+                <h2>Review Complete</h2>
+                <p>Thank you for reviewing the question bank. Your feedback has been saved locally.</p>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalQuestionsReviewed">0</div>
+                        <div class="stat-label">Questions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalComments">0</div>
+                        <div class="stat-label">Comments Made</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="completionPercent">0%</div>
+                        <div class="stat-label">With Feedback</div>
+                    </div>
+                </div>
+
+                <div class="email-section">
+                    <h3>Submit Your Review</h3>
+                    <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
+                        Click the button below to download your comments, then email them to:<br>
+                        <strong style="color: #fff;">christian.treat@stonybrookmedicine.edu</strong>
+                    </p>
+
+                    <div class="button-group">
+                        <button onclick="downloadComments()">Download Comments (JSON)</button>
+                        <button onclick="downloadCommentsText()">Download Comments (Text)</button>
+                        <button onclick="copyEmailDraft()">Copy Email Draft</button>
+                    </div>
+                </div>
+
+                <div class="download-section">
+                    <button onclick="returnToReview()">Return to Review</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="saved-indicator" id="savedIndicator">Comments saved</div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                number: 1,
+                stem: "A 4 y/o hemodynamically stable male presents with cough, fevers and congestion for 2 days, you perform the ultrasound, what is the next best step in management",
+                answers: ["A. Antibiotics", "B. CXR", "C. Transfer to children", "D. Tylenol and d/c"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1660318530325-P9UBT29O9YR3PBCRGYBJ/image-asset.gif?format=300w"
+            },
+            {
+                number: 2,
+                stem: "Which of the following is NOT associated with the below clip",
+                answers: ["A. Increased risk of torsion", "B. Chronic pain", "C. Presence of free fluid in the abdomen", "D. Increased prevalence in reproductive age"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1607200672734-Y4TG74ED7Z7PBJ73XWZ0/image-asset.gif?format=500w"
+            },
+            {
+                number: 3,
+                stem: "At what gestational age can you reliably visualize a fetal pole with cardiac activity on transvaginal ultrasound? (Assume normal viable intrauterine pregnancy)",
+                answers: ["A. 4-5 weeks", "B. 5.5-6 weeks", "C. 7-8 weeks", "D. 9-10 weeks"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1720554061163-UTEU446DV5FSBC5Z61LQ/image-asset.gif?format=300w"
+            },
+            {
+                number: 4,
+                stem: "What is the likely complaint of the following patient",
+                answers: ["A. Painful arm rotation", "B. Headache", "C. Back Pain", "D. Fracture"],
+                image: "https://images.squarespace-cdn.com/content/v1/5bc94f5b9b7d1515843688af/1616937880006-PGQRLVROBBY2CVU3A8Y7/n.png?format=2500w",
+                note: "Giant cell arteritis"
+            },
+            {
+                number: 5,
+                stem: "What is the most likely diagnosis, and which additional ultrasound finding would make you MOST concerned?",
+                answers: ["A. Ectopic pregnancy; presence of yolk sac in adnexal mass", "B. Ectopic pregnancy; moderate to large free fluid in Morrison's pouch", "C. Heterotopic pregnancy; absent cardiac activity in IUP", "D. Corpus luteum cyst; complex echogenic appearance"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1706570866137-EE4Q4LKJK92SV4GY7C0B/image-asset.gif?format=750w"
+            },
+            {
+                number: 6,
+                stem: "A 78 y/o female on plavix presents with vision changes you perform the following ultrasound what is your next step in management?",
+                answers: ["A. Lateral Canthotomy", "B. Stop plavix and d/w Optho", "C. Neurology consult", "D. Possible Thrombolytic therapy and optho consult"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1514856196906-FUG64OLXYMGE9IMGE8NE/Central+Retinal+Artery+Occlusion+venous+flow+-+Schechter.gif?format=2500w"
+            },
+            {
+                number: 7,
+                stem: "Based on the ultrasound findings what is the most appropriate referral timeframe?",
+                answers: ["A. Emergent - same day (within 6 hours)", "B. Urgent - within 24 hours", "C. Semi-urgent - within 1 week", "D. Routine - within 2-4 weeks"]
+            },
+            {
+                number: 8,
+                stem: "A 70 y/o male presents with mild abdominal pain and stable vital signs. What is the most likely cause of the findings seen?",
+                answers: ["A. Perforated Viscous", "B. Prior Surgical procedure", "C. Acute cholecystitis", "D. Mesenteric Ischemia"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567013645799-IIBASIEONI3N68X3IYZC/pneumobilia.gif?format=2500w"
+            },
+            {
+                number: 9,
+                stem: "The region where the ultrasound beam converges before diverging is called the _____ and its length is determined by _____",
+                answers: ["A. Fresnel zone; transducer frequency and diameter", "B. Fraunhofer zone; pulse repetition frequency", "C. Focal zone; gain settings", "D. Near field; time-gain compensation"]
+            },
+            {
+                number: 10,
+                stem: "All of the following are ultrasonographic signs of AAA rupture except",
+                answers: ["A. Turbulent Flow", "B. Disruptions of calcifications in the wall", "C. Depression of the psoas muscle", "D. Surrounding free fluid", "E. All of the above are true"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1617893937647-54ZZ3JZ55YZ2S4D0DXHA/image-asset.gif?format=500w"
+            },
+            {
+                number: 11,
+                stem: "The artifact seen in this clip is called ______ and is due to _____ of sound waves",
+                answers: ["A. Posterior Acoustic enhancement, low attenuation", "B. Side lobe, low attenuation", "C. Posterior acoustic enhancement, high attenuation", "D. Side lobe, high attenuation"],
+                image: "https://www.pocus.org/wp-content/uploads/2023/07/Screenshot-2023-07-23-144616.png"
+            },
+            {
+                number: 12,
+                stem: "A 32 y/o female presents with severe lower abdominal pain what is the most sensitive finding of the pathology seen on this clip",
+                answers: ["A. Peripheralization of the follicles", "B. Lack of blood flow to the ovary", "C. Enlarged ovary", "D. Free fluid"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1609959738037-49YAZDNSYA07CI8PAFG8/image-asset.gif?format=500w"
+            },
+            {
+                number: 13,
+                stem: "Which of the following clips are not suggestive of right sided heart disease",
+                answers: ["A. [Image A]", "B. [Image B]", "C. [Image C]", "D. [Image D]"],
+                note: "Stimuli of right heart stuff"
+            },
+            {
+                number: 14,
+                stem: "A patient presents in cardiac arrest in active compressions what is the next best step in management of this patient",
+                answers: ["A. Empiric tissue plasminogen activator (tPA) for massive PE", "B. Immediate pericardiocentesis for cardiac tamponade", "C. Reposition compressions higher on the sternum", "D. Terminate resuscitation - poor prognosis", "E. Continue current management and search for other H's/T's"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1616443665596-8SM6QHLY76QAGMUBV34Y/image-asset.gif?format=500w"
+            },
+            {
+                number: 15,
+                stem: "A patient presents with pain to his hand which is the next step in management",
+                answers: ["A. Start antibiotics", "B. Emergent surgery", "C. Splint", "D. Foreign body removal"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1554692613487-GL7ES4Y1OBRHFT0YO3BV/necrotizing+fasciitis+.gif?format=500w"
+            },
+            {
+                number: 16,
+                stem: "Approximately how many standard single-use ultrasound gel packets could fit inside a one of our trauma resuscitation rooms (floor to ceiling, wall to wall) if perfectly packed?",
+                answers: ["A. 10,000 packets", "B. 100,000 packets", "C. 1,000,000 packets", "D. 10,000,000 packets"]
+            },
+            {
+                number: 17,
+                stem: "Which of the following is most accurate regarding tricuspid annular plane systolic excursion",
+                answers: ["A. Less reliable in a patient with a prior inferior myocardial infarct", "B. May be measured using the subxiphoid or apical four view", "C. Measures circumferential right ventricular systolic function", "D. Should not be measured in a patient with an irregular heart beat"]
+            },
+            {
+                number: 18,
+                stem: "A patient on anticoagulation presents with blurry vision based on the following ultrasound what is your next step in management (retrobulbar hematoma)",
+                answers: ["A. Emergent Optho Evaluation", "B. Lateral Canthotomy", "C. Anticoagulation", "D. CT scans", "E. Eye Shield"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1616116010452-4OI6MM2EOTIOIIPZ5EC1/image-asset.gif?format=500w"
+            },
+            {
+                number: 19,
+                stem: "Based on the ultrasound anatomy shown below, what nerve block is being performed?",
+                answers: ["A. Serratus Anterior Plane Block", "B. Interscalene Block", "C. Erector Spinae Plane Block", "D. PENG (Pericapsular Nerve Group) Block"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1605815952957-DFQAOMVN5P97IFHIP7SM/image-asset.gif?format=750w"
+            },
+            {
+                number: 20,
+                stem: "Based on the ultrasound anatomy shown, what procedure is being performed and what pain will it relieve?",
+                answers: ["A. Femoral nerve block - anterior thigh pain", "B. Fascia iliaca block - hip and proximal femur pain", "C. Obturator nerve block - medial thigh pain", "D. Sciatic nerve block - posterior leg pain"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1605665047706-0GS9Z718BYIBOQ90G5KV/image-asset.gif?format=500w"
+            },
+            {
+                number: 21,
+                stem: "What is Dan Singer's band's name?",
+                answers: ["A. Cool Dude Groovin", "B. The Ultra Gellies", "C. Dude, Where's My Probe?", "D. The Artifacts"]
+            },
+            {
+                number: 22,
+                stem: "You perform the following ultrasound. What is true regarding the ultrasound beam as it travels from soft tissue to air?",
+                answers: ["A. The Velocity increases", "B. The Pulse duration increases", "C. The Wavelength Decreases", "D. The Frequency Decreases"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1527653744461-9JV9FLATDWL00GOWJIZ3/a+lines+normal.gif?format=500w"
+            },
+            {
+                number: 23,
+                stem: "The structure shown in PINK is part of the portal triad. What are the other two structures in this triad?",
+                answers: ["A. Hepatic artery and portal vein", "B. Common bile duct and hepatic vein", "C. Cystic duct and hepatic artery", "D. Portal vein and common bile duct"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1567929662896-OVT3GRVKEE6G5FYO7RDA/gallbladder-and-cbd.gif?format=750w"
+            },
+            {
+                number: 24,
+                stem: "A 65 y/o with dyspnea on exertion. The M-mode measurement shown is 15 mm. What does this suggest?",
+                answers: ["A. Normal LV systolic function (EF >55%)", "B. Mild LV dysfunction (EF 40-50%)", "C. Moderate-severe LV dysfunction (EF <40%)", "D. Diastolic dysfunction with preserved EF"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1680198032131-P2FIQDODZHSKVCF9JZKP/image-asset.gif?format=300w"
+            },
+            {
+                number: 25,
+                stem: "You're performing a carotid Doppler study using a 7.5 MHz linear probe at a 60-degree angle. The speed of sound in tissue is 1,540 m/s. Your imaging depth is 4.2 cm. If the pulse repetition frequency (PRF) is 8,000 Hz, and you observe aliasing of blood flow in the internal carotid artery, what is the MINIMUM true peak systolic velocity of blood flow?\n\nFormula: Nyquist Limit (m/s) = (PRF × c) / (4 × f × cos θ)",
+                answers: ["A. 0.34 m/s", "B. 0.68 m/s", "C. 1.37 m/s", "D. 2.05 m/s"]
+            },
+            {
+                number: 26,
+                stem: "The technique shown would be MOST useful for which clinical scenario?",
+                answers: ["A. Evaluating for deep vein thrombosis", "B. Localizing a superficial foreign body", "C. Assessing for pleural effusion", "D. Measuring bladder volume"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1603201414354-M763CKLJBGA2BFY30QZU/image-asset.gif?format=750w"
+            },
+            {
+                number: 27,
+                stem: "A trauma patient has the pelvic FAST view shown. Which statement is TRUE regarding this finding?",
+                answers: ["A. Negative FAST rules out all intra-abdominal injury", "B. This amount of fluid represents at least 500-1000 mL of hemoperitoneum", "C. Free fluid in pelvis is the most sensitive FAST view", "D. CT is required to confirm this finding before treatment"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1507764822945-I5AIOFVSXHQ8P5FW445E/bowra+pos+fast+trans+bladder.gif?format=300w"
+            },
+            {
+                number: 28,
+                stem: "What is the clinical significance of this finding?",
+                answers: ["A. Requires immediate anticoagulation - high PE risk", "B. Superficial thrombophlebitis - lower risk than DVT", "C. Requires IVC filter placement", "D. No treatment needed - benign finding"],
+                image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1626288896671-HXRWMPFW1JKWXILXQX1H/image-asset.gif?format=500w"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let comments = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadComments();
+            document.getElementById('totalQuestions').textContent = questions.length;
+            showQuestion(currentQuestionIndex);
+            document.getElementById('questionView').style.display = 'block';
+
+            // Auto-save on input
+            document.getElementById('stemComment').addEventListener('input', saveCurrentComments);
+            document.getElementById('answersComment').addEventListener('input', saveCurrentComments);
+            document.getElementById('imageComment').addEventListener('input', saveCurrentComments);
+        });
+
+        function showQuestion(index) {
+            const question = questions[index];
+
+            // Update question content
+            document.getElementById('questionNumber').textContent = `Question ${question.number}`;
+            document.getElementById('questionStem').textContent = question.stem;
+            document.getElementById('currentQuestion').textContent = index + 1;
+
+            // Update answers
+            const answersContainer = document.getElementById('answersContainer');
+            answersContainer.innerHTML = '';
+            question.answers.forEach(answer => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-option';
+                answerDiv.textContent = answer;
+                answersContainer.appendChild(answerDiv);
+            });
+
+            // Handle image
+            if (question.image) {
+                document.getElementById('questionImageContainer').style.display = 'block';
+                document.getElementById('questionImage').src = question.image;
+                document.getElementById('imageCommentHeader').style.display = 'block';
+                document.getElementById('imageComment').style.display = 'block';
+            } else {
+                document.getElementById('questionImageContainer').style.display = 'none';
+                document.getElementById('imageCommentHeader').style.display = 'none';
+                document.getElementById('imageComment').style.display = 'none';
+            }
+
+            // Handle note
+            if (question.note) {
+                document.getElementById('noteContainer').style.display = 'block';
+                document.getElementById('questionNote').textContent = 'Note: ' + question.note;
+            } else {
+                document.getElementById('noteContainer').style.display = 'none';
+            }
+
+            // Load saved comments for this question
+            loadQuestionComments(question.number);
+
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function loadQuestionComments(questionNumber) {
+            const questionComments = comments[questionNumber] || {};
+            document.getElementById('stemComment').value = questionComments.stem || '';
+            document.getElementById('answersComment').value = questionComments.answers || '';
+            document.getElementById('imageComment').value = questionComments.image || '';
+        }
+
+        function saveCurrentComments() {
+            const questionNumber = questions[currentQuestionIndex].number;
+
+            if (!comments[questionNumber]) {
+                comments[questionNumber] = {};
+            }
+
+            comments[questionNumber].stem = document.getElementById('stemComment').value;
+            comments[questionNumber].answers = document.getElementById('answersComment').value;
+            comments[questionNumber].image = document.getElementById('imageComment').value;
+            comments[questionNumber].lastUpdated = new Date().toISOString();
+
+            localStorage.setItem('qbank_comments', JSON.stringify(comments));
+            showSavedIndicator();
+        }
+
+        function loadComments() {
+            const saved = localStorage.getItem('qbank_comments');
+            if (saved) {
+                comments = JSON.parse(saved);
+            }
+        }
+
+        function showSavedIndicator() {
+            const indicator = document.getElementById('savedIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveCurrentComments();
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+            }
+        }
+
+        function nextQuestion() {
+            saveCurrentComments();
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+            } else {
+                showCompletionScreen();
+            }
+        }
+
+        function showCompletionScreen() {
+            document.getElementById('questionView').style.display = 'none';
+            document.getElementById('completionView').style.display = 'block';
+
+            // Calculate stats
+            const totalQuestions = questions.length;
+            let totalComments = 0;
+            let questionsWithComments = 0;
+
+            Object.keys(comments).forEach(qNum => {
+                const qComments = comments[qNum];
+                if (qComments.stem) totalComments++;
+                if (qComments.answers) totalComments++;
+                if (qComments.image) totalComments++;
+
+                if (qComments.stem || qComments.answers || qComments.image) {
+                    questionsWithComments++;
+                }
+            });
+
+            document.getElementById('totalQuestionsReviewed').textContent = totalQuestions;
+            document.getElementById('totalComments').textContent = totalComments;
+            document.getElementById('completionPercent').textContent =
+                Math.round((questionsWithComments / totalQuestions) * 100) + '%';
+        }
+
+        function returnToReview() {
+            document.getElementById('completionView').style.display = 'none';
+            document.getElementById('questionView').style.display = 'block';
+            currentQuestionIndex = 0;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function downloadComments() {
+            const reviewData = {
+                reviewDate: new Date().toISOString(),
+                totalQuestions: questions.length,
+                comments: comments
+            };
+
+            const dataStr = JSON.stringify(reviewData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `qbank-review-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadCommentsText() {
+            let text = 'ULTRASOUND QUESTION BANK REVIEW\n';
+            text += '================================\n\n';
+            text += `Review Date: ${new Date().toLocaleString()}\n`;
+            text += `Total Questions: ${questions.length}\n`;
+            text += `Questions with Comments: ${Object.keys(comments).length}\n\n`;
+            text += '================================\n\n';
+
+            questions.forEach(q => {
+                const qComments = comments[q.number];
+                if (qComments && (qComments.stem || qComments.answers || qComments.image)) {
+                    text += `QUESTION ${q.number}\n`;
+                    text += '-'.repeat(50) + '\n';
+                    text += `${q.stem}\n\n`;
+
+                    q.answers.forEach(a => {
+                        text += `${a}\n`;
+                    });
+                    text += '\n';
+
+                    if (qComments.stem) {
+                        text += 'COMMENT ON QUESTION STEM:\n';
+                        text += qComments.stem + '\n\n';
+                    }
+                    if (qComments.answers) {
+                        text += 'COMMENT ON ANSWER CHOICES:\n';
+                        text += qComments.answers + '\n\n';
+                    }
+                    if (qComments.image) {
+                        text += 'COMMENT ON IMAGE:\n';
+                        text += qComments.image + '\n\n';
+                    }
+                    text += '================================\n\n';
+                }
+            });
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `qbank-review-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyEmailDraft() {
+            const subject = `Question Bank Review - ${new Date().toLocaleDateString()}`;
+            const body = `Dear Dr. Treat,
+
+Please find attached my review of the ultrasound question bank. I have reviewed ${questions.length} questions and provided feedback on ${Object.keys(comments).length} of them.
+
+Review Date: ${new Date().toLocaleString()}
+
+The comments have been exported and are attached to this email.
+
+Best regards`;
+
+            const emailText = `To: christian.treat@stonybrookmedicine.edu
+Subject: ${subject}
+
+${body}`;
+
+            navigator.clipboard.writeText(emailText).then(() => {
+                alert('Email draft copied to clipboard! You can now paste it into your email client.\n\nDon\'t forget to attach the downloaded comments file.');
+            }).catch(err => {
+                alert('Failed to copy to clipboard. Please manually copy the email information.');
+                console.error('Copy failed:', err);
+            });
+        }
+    </script>
+</body>
+</html>
