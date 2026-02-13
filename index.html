@@ -725,8 +725,8 @@
                     '<div class="submit-content">' +
                         '<label for="playerName">Enter your name</label>' +
                         '<input type="text" id="playerName" placeholder="First and Last Name" value="' + savedName.replace(/"/g, '&quot;') + '">' +
-                        '<button class="submit-btn" onclick="submitQuiz()">Submit</button>' +
-                        '<p class="submit-warning">This will open your email client to send your answers.</p>' +
+                        '<button class="submit-btn" id="submitBtn" onclick="submitQuiz()">Submit</button>' +
+                        '<p class="submit-warning" id="submitMsg"></p>' +
                     '</div>';
                 updateProgress();
                 var nameInput = document.getElementById('playerName');
@@ -832,6 +832,8 @@
 
         function submitQuiz() {
             var nameInput = document.getElementById('playerName');
+            var submitBtn = document.getElementById('submitBtn');
+            var submitMsg = document.getElementById('submitMsg');
             var name = nameInput ? nameInput.value.trim() : '';
             if (!name) {
                 nameInput.focus();
@@ -839,11 +841,13 @@
                 return;
             }
 
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            submitMsg.textContent = '';
+
             var data = loadData();
             var realQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
             var lines = [];
-            lines.push('Name: ' + name);
-            lines.push('');
             realQuestions.forEach(function(q) {
                 var sel = data[q.number]?.selected;
                 var answer = sel !== null && sel !== undefined ? q.answers[sel] : 'No answer';
@@ -857,9 +861,34 @@
             lines.push('');
             lines.push('Answered: ' + answered + '/' + realQuestions.length);
 
-            var subject = encodeURIComponent('SONOGAMES quiz');
-            var body = encodeURIComponent(lines.join('\n'));
-            window.location.href = 'mailto:christian.treat@stonybrookmedicine.edu?subject=' + subject + '&body=' + body;
+            var formData = new FormData();
+            formData.append('name', name);
+            formData.append('_subject', 'SONOGAMES quiz');
+            formData.append('message', lines.join('\n'));
+            formData.append('_captcha', 'false');
+            formData.append('_template', 'box');
+
+            fetch('https://formsubmit.co/ajax/christian.treat@stonybrookmedicine.edu', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    submitBtn.textContent = 'Submitted!';
+                    submitBtn.style.backgroundColor = '#2a8a4a';
+                    submitMsg.textContent = 'Your answers have been sent.';
+                    submitMsg.style.color = '#4a4';
+                } else {
+                    throw new Error('Submission failed');
+                }
+            })
+            .catch(function() {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+                submitMsg.textContent = 'Something went wrong. Please try again.';
+                submitMsg.style.color = '#c44';
+            });
         }
 
         // Initialize
