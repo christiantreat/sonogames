@@ -250,6 +250,66 @@
             border-color: #777;
         }
 
+        /* Submit page */
+        .submit-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+
+        .submit-content label {
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .submit-content input[type="text"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #1a1a1a;
+            color: #fff;
+            outline: none;
+        }
+
+        .submit-content input[type="text"]:focus {
+            border-color: #666;
+        }
+
+        .submit-btn {
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: 500;
+            background-color: #1a6b35;
+            color: #fff;
+            border: 1px solid #2a8a4a;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #228b44;
+            border-color: #3a9a5a;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .submit-warning {
+            color: #888;
+            font-size: 13px;
+            text-align: center;
+            max-width: 400px;
+        }
+
         @media print {
             body { background-color: #fff; color: #000; }
             .question-header { display: none; }
@@ -587,6 +647,11 @@
                     "D. 2-week-old with bilious vomiting, abdominal distension, and bloody stools"
                 ],
                 image: "https://images.squarespace-cdn.com/content/v1/58118909e3df282037abfad7/1701692940456-I5NH1PSPMSJ5Z9VGR38E/ezgif.com-gif-maker.gif?format=750w"
+            },
+            {
+                number: 30,
+                stem: "Submit Your Quiz",
+                type: "submit"
             }
         ];
 
@@ -643,6 +708,36 @@
             const prevDisabled = index === 0 ? 'disabled' : '';
             const nextDisabled = index === questions.length - 1 ? 'disabled' : '';
 
+            // Submit page
+            if (q.type === 'submit') {
+                const savedName = localStorage.getItem('qbankQuizName') || '';
+                container.innerHTML =
+                    '<div class="question-header">' +
+                        '<button class="nav-btn" onclick="prevQuestion()" ' + prevDisabled + '>&#8592; Prev</button>' +
+                        '<div class="header-center">' +
+                            '<span class="question-counter">Submit</span>' +
+                            '<span class="progress" id="progress"></span>' +
+                            '<span class="save-status" id="saveStatus"></span>' +
+                        '</div>' +
+                        '<button class="nav-btn" disabled>Next &#8594;</button>' +
+                    '</div>' +
+                    '<div class="question-stem">' + q.stem + '</div>' +
+                    '<div class="submit-content">' +
+                        '<label for="playerName">Enter your name</label>' +
+                        '<input type="text" id="playerName" placeholder="First and Last Name" value="' + savedName.replace(/"/g, '&quot;') + '">' +
+                        '<button class="submit-btn" onclick="submitQuiz()">Submit</button>' +
+                        '<p class="submit-warning">This will open your email client to send your answers.</p>' +
+                    '</div>';
+                updateProgress();
+                var nameInput = document.getElementById('playerName');
+                if (nameInput) {
+                    nameInput.addEventListener('input', function() {
+                        localStorage.setItem('qbankQuizName', nameInput.value);
+                    });
+                }
+                return;
+            }
+
             let answersHtml = '';
             q.answers.forEach((answer, i) => {
                 const id = 'q' + q.number + '_a' + i;
@@ -670,7 +765,7 @@
                 '<div class="question-header">' +
                     '<button class="nav-btn" onclick="prevQuestion()" ' + prevDisabled + '>&#8592; Prev</button>' +
                     '<div class="header-center">' +
-                        '<span class="question-counter">Question ' + (index + 1) + ' of ' + questions.length + '</span>' +
+                        '<span class="question-counter">Question ' + (index + 1) + ' of ' + (questions.length - 1) + '</span>' +
                         '<span class="progress" id="progress"></span>' +
                         '<span class="save-status" id="saveStatus"></span>' +
                     '</div>' +
@@ -707,12 +802,10 @@
         }
 
         function saveData() {
-            const data = {};
-            questions.forEach(function(q) {
-                data[q.number] = { selected: null };
-                var sel = document.querySelector('input[name="q' + q.number + '"]:checked');
-                if (sel) data[q.number].selected = parseInt(sel.value);
-            });
+            const data = loadData();
+            const q = questions[currentQuestionIndex];
+            var sel = document.querySelector('input[name="q' + q.number + '"]:checked');
+            data[q.number] = { selected: sel ? parseInt(sel.value) : null };
             localStorage.setItem('qbankQuiz', JSON.stringify(data));
             showSaveStatus('Saved!');
             updateProgress();
@@ -729,11 +822,44 @@
         function updateProgress() {
             var data = loadData();
             var answered = 0;
-            questions.forEach(function(q) {
+            var totalQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
+            totalQuestions.forEach(function(q) {
                 if (data[q.number]?.selected !== null && data[q.number]?.selected !== undefined) answered++;
             });
             var el = document.getElementById('progress');
-            if (el) el.textContent = answered + '/' + questions.length + ' answered';
+            if (el) el.textContent = answered + '/' + totalQuestions.length + ' answered';
+        }
+
+        function submitQuiz() {
+            var nameInput = document.getElementById('playerName');
+            var name = nameInput ? nameInput.value.trim() : '';
+            if (!name) {
+                nameInput.focus();
+                nameInput.style.borderColor = '#c44';
+                return;
+            }
+
+            var data = loadData();
+            var realQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
+            var lines = [];
+            lines.push('Name: ' + name);
+            lines.push('');
+            realQuestions.forEach(function(q) {
+                var sel = data[q.number]?.selected;
+                var answer = sel !== null && sel !== undefined ? q.answers[sel] : 'No answer';
+                lines.push('Q' + q.number + ': ' + answer);
+            });
+
+            var answered = 0;
+            realQuestions.forEach(function(q) {
+                if (data[q.number]?.selected !== null && data[q.number]?.selected !== undefined) answered++;
+            });
+            lines.push('');
+            lines.push('Answered: ' + answered + '/' + realQuestions.length);
+
+            var subject = encodeURIComponent('SONOGAMES quiz');
+            var body = encodeURIComponent(lines.join('\n'));
+            window.location.href = 'mailto:christian.treat@stonybrookmedicine.edu?subject=' + subject + '&body=' + body;
         }
 
         // Initialize
