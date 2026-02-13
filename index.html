@@ -42,19 +42,11 @@
             font-size: 18px;
             margin-bottom: 20px;
             font-weight: 500;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .question-stem {
             margin-bottom: 15px;
             font-size: 16px;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .answers {
@@ -81,10 +73,6 @@
         .answer-option label {
             cursor: pointer;
             display: inline;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .image-container {
@@ -96,12 +84,6 @@
             height: auto;
             border: 1px solid #333;
             border-radius: 3px;
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-            user-drag: none;
-            pointer-events: none;
         }
 
         .note {
@@ -111,10 +93,6 @@
             border-left: 3px solid #666;
             font-size: 14px;
             font-style: italic;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .controls {
@@ -608,50 +586,6 @@
                 e.preventDefault();
                 showCheatPopup();
             }
-        });
-
-        // Prevent copy event (backup)
-        document.addEventListener('copy', function(e) {
-            e.preventDefault();
-            showCheatPopup();
-        });
-
-        // Prevent text selection via selectstart
-        document.addEventListener('selectstart', function(e) {
-            // Allow selection on the modal close button
-            if (e.target.closest('.cheat-modal')) return;
-            e.preventDefault();
-            showCheatPopup();
-        });
-
-        // Detect drag-selection attempts on question blocks
-        let mouseDownOnQuestion = false;
-        let mouseDownPos = { x: 0, y: 0 };
-
-        document.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.question-block') && !e.target.closest('input[type="radio"]')) {
-                mouseDownOnQuestion = true;
-                mouseDownPos = { x: e.clientX, y: e.clientY };
-            }
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (mouseDownOnQuestion) {
-                const dx = Math.abs(e.clientX - mouseDownPos.x);
-                const dy = Math.abs(e.clientY - mouseDownPos.y);
-                if (dx > 15 || dy > 15) {
-                    mouseDownOnQuestion = false;
-                    showCheatPopup();
-                }
-            }
-        });
-
-        document.addEventListener('mouseup', function() {
-            mouseDownOnQuestion = false;
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeCheatModal();
             }
