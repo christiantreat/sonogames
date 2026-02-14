@@ -134,6 +134,54 @@
             object-fit: contain;
             border: 1px solid #333;
             border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Image lightbox */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9998;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox-overlay.show {
+            display: flex;
+        }
+
+        .lightbox-overlay img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            color: #fff;
+            font-size: 32px;
+            cursor: pointer;
+            z-index: 9999;
+            background: none;
+            border: none;
+            line-height: 1;
+            padding: 4px 10px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
         }
 
         .answers-column {
@@ -383,6 +431,12 @@
             <div class="quote" id="cheatQuote"></div>
             <button onclick="closeCheatModal()">OK</button>
         </div>
+    </div>
+
+    <!-- Image lightbox -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+        <img id="lightboxImg" src="" alt="Enlarged image">
     </div>
 
     <script>
@@ -741,13 +795,24 @@
             document.getElementById('cheatOverlay').classList.remove('show');
         }
 
+        // --- Image lightbox ---
+        function openLightbox(src) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.add('show');
+        }
+
+        function closeLightbox(e) {
+            if (e && e.target && e.target.id === 'lightboxImg') return;
+            document.getElementById('lightbox').classList.remove('show');
+        }
+
         // --- Cheat-proofing ---
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A')) {
                 e.preventDefault();
                 showCheatPopup();
             }
-            if (e.key === 'Escape') closeCheatModal();
+            if (e.key === 'Escape') { closeLightbox(e); closeCheatModal(); }
             if (e.key === 'ArrowRight') nextQuestion();
             if (e.key === 'ArrowLeft') prevQuestion();
         });
@@ -818,7 +883,7 @@
             let contentHtml;
             if (q.image) {
                 contentHtml = '<div class="question-content">' +
-                    '<div class="image-column"><img src="' + q.image + '" alt="Question ' + q.number + ' image" draggable="false"></div>' +
+                    '<div class="image-column"><img src="' + q.image + '" alt="Question ' + q.number + ' image" draggable="false" onclick="openLightbox(this.src)"></div>' +
                     '<div class="answers-column"><div class="answers">' + answersHtml + '</div>' +
                     (q.note ? '<div class="note">Note: ' + q.note + '</div>' : '') +
                     '</div></div>';
