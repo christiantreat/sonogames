@@ -908,10 +908,26 @@
         let lastPopupTime = 0;
         let currentQuestionIndex = 0;
 
+        // --- Metadata tracking ---
+        let quizStartTime = null;
+        let questionViewTimes = {};   // { questionNumber: timestamp when first viewed }
+        let questionDurations = {};   // { questionNumber: seconds spent before answering }
+        let questionEnteredAt = null; // timestamp when current question was shown
+        let behaviorLog = [];         // array of { type, timestamp, detail }
+
+        function logBehavior(type, detail) {
+            behaviorLog.push({
+                type: type,
+                time: new Date().toLocaleTimeString(),
+                detail: detail || ''
+            });
+        }
+
         function showCheatPopup() {
             const now = Date.now();
             if (now - lastPopupTime < 1500) return;
             lastPopupTime = now;
+            logBehavior('copy_attempt', 'Q' + (currentQuestionIndex + 1));
             const quote = cheatQuotes[Math.floor(Math.random() * cheatQuotes.length)];
             document.getElementById('cheatQuote').textContent = quote;
             document.getElementById('cheatOverlay').classList.add('show');
@@ -932,6 +948,18 @@
             document.getElementById('lightbox').classList.remove('show');
         }
 
+        // --- Tab switch / focus tracking ---
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && quizStartTime) {
+                logBehavior('tab_hidden', 'Q' + (currentQuestionIndex + 1));
+            }
+        });
+        window.addEventListener('blur', function() {
+            if (quizStartTime) {
+                logBehavior('window_blur', 'Q' + (currentQuestionIndex + 1));
+            }
+        });
+
         // --- Cheat-proofing ---
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A')) {
@@ -945,23 +973,39 @@
 
         // --- Render a single question into the quiz container ---
         function showQuestion(index) {
+            // Record time spent on previous question before navigating away
+            if (questionEnteredAt && currentQuestionIndex >= 0) {
+                var prevQ = questions[currentQuestionIndex];
+                if (prevQ && prevQ.type !== 'submit') {
+                    var elapsed = Math.round((Date.now() - questionEnteredAt) / 1000);
+                    questionDurations[prevQ.number] = (questionDurations[prevQ.number] || 0) + elapsed;
+                }
+            }
+
             currentQuestionIndex = index;
             const container = document.getElementById('quiz');
 
             // Welcome page
             if (index === -1) {
+                questionEnteredAt = null;
                 container.innerHTML =
                     '<div class="welcome-content">' +
                         '<div class="welcome-title">Welcome to<br>Stony Brook Sonogames 2026<br>Qualifying Quiz</div>' +
                         '<div class="welcome-subtitle">Your answers save automatically as you go.<br>You can close and come back anytime.</div>' +
                         '<div class="welcome-highlight">Winners get a trip to ATL 2026!</div>' +
                         '<div class="welcome-luck">Good luck!</div>' +
-                        '<button class="welcome-btn" onclick="showQuestion(0)">Begin Quiz</button>' +
+                        '<button class="welcome-btn" onclick="startQuiz()">Begin Quiz</button>' +
                     '</div>';
                 return;
             }
 
             const q = questions[index];
+
+            // Track when each question is first viewed
+            if (q.type !== 'submit' && !questionViewTimes[q.number]) {
+                questionViewTimes[q.number] = new Date().toLocaleTimeString();
+            }
+            questionEnteredAt = Date.now();
             const savedData = loadData();
 
             const prevDisabled = '';
@@ -1036,6 +1080,12 @@
             updateProgress();
         }
 
+        function startQuiz() {
+            quizStartTime = new Date();
+            logBehavior('quiz_started');
+            showQuestion(0);
+        }
+
         function nextQuestion() {
             if (currentQuestionIndex < questions.length - 1) {
                 showQuestion(currentQuestionIndex + 1);
@@ -1104,13 +1154,27 @@
             submitBtn.textContent = 'Submitting...';
             submitMsg.textContent = '';
 
+            // Capture final question timing
+            if (questionEnteredAt && currentQuestionIndex >= 0) {
+                var curQ = questions[currentQuestionIndex];
+                if (curQ && curQ.type !== 'submit') {
+                    var elapsed = Math.round((Date.now() - questionEnteredAt) / 1000);
+                    questionDurations[curQ.number] = (questionDurations[curQ.number] || 0) + elapsed;
+                }
+                questionEnteredAt = null;
+            }
+
+            var submitTime = new Date();
+            logBehavior('quiz_submitted');
+
             var data = loadData();
             var realQuestions = questions.filter(function(q) { return q.type !== 'submit'; });
             var lines = [];
             realQuestions.forEach(function(q) {
                 var sel = data[q.number]?.selected;
                 var answer = sel !== null && sel !== undefined ? q.answers[sel] : 'No answer';
-                lines.push('Q' + q.number + ': ' + answer);
+                var duration = questionDurations[q.number] ? questionDurations[q.number] + 's' : '-';
+                lines.push('Q' + q.number + ' (' + duration + '): ' + answer);
             });
 
             var answered = 0;
@@ -1119,6 +1183,44 @@
             });
             lines.push('');
             lines.push('Answered: ' + answered + '/' + realQuestions.length);
+
+            // --- Metadata ---
+            lines.push('');
+            lines.push('=== METADATA ===');
+            lines.push('Quiz started: ' + (quizStartTime ? quizStartTime.toLocaleString() : 'Unknown'));
+            lines.push('Quiz submitted: ' + submitTime.toLocaleString());
+            if (quizStartTime) {
+                var totalSec = Math.round((submitTime - quizStartTime) / 1000);
+                var mins = Math.floor(totalSec / 60);
+                var secs = totalSec % 60;
+                lines.push('Total duration: ' + mins + 'm ' + secs + 's');
+            }
+
+            lines.push('');
+            lines.push('--- Time per question ---');
+            realQuestions.forEach(function(q) {
+                var dur = questionDurations[q.number];
+                var firstView = questionViewTimes[q.number] || 'never viewed';
+                lines.push('Q' + q.number + ': ' + (dur ? dur + 's' : 'not timed') + ' (first viewed: ' + firstView + ')');
+            });
+
+            if (behaviorLog.length > 0) {
+                lines.push('');
+                lines.push('--- Behavior flags ---');
+                var tabSwitches = behaviorLog.filter(function(e) { return e.type === 'tab_hidden' || e.type === 'window_blur'; });
+                var copyAttempts = behaviorLog.filter(function(e) { return e.type === 'copy_attempt'; });
+                lines.push('Tab switches / window blurs: ' + tabSwitches.length);
+                lines.push('Copy/select-all attempts: ' + copyAttempts.length);
+                lines.push('');
+                lines.push('Event log:');
+                behaviorLog.forEach(function(e) {
+                    lines.push('  [' + e.time + '] ' + e.type + (e.detail ? ' (' + e.detail + ')' : ''));
+                });
+            } else {
+                lines.push('');
+                lines.push('--- Behavior flags ---');
+                lines.push('No erratic behavior detected.');
+            }
 
             var formData = new FormData();
             formData.append('name', name);
