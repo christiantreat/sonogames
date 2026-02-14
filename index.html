@@ -414,6 +414,131 @@
             border-color: #3a9a5a;
         }
 
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .quiz-wrapper {
+                padding: 4px 6px;
+            }
+
+            .question-header {
+                padding: 8px 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .header-center {
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .progress, .save-status {
+                display: none;
+            }
+
+            .question-stem {
+                padding: 10px 14px;
+                font-size: 15px;
+            }
+
+            /* Stack image above answers */
+            .question-content {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 14px;
+            }
+
+            .image-column {
+                flex: none;
+                max-height: 35vh;
+            }
+
+            .image-column img {
+                max-height: 35vh;
+            }
+
+            .answers-column {
+                flex: none;
+            }
+
+            .answer-option label {
+                padding: 11px 12px;
+                font-size: 15px;
+                line-height: 1.4;
+            }
+
+            .answer-option input[type="radio"] {
+                transform: scale(1.3);
+                margin-right: 12px;
+            }
+
+            .note {
+                font-size: 12px;
+            }
+
+            .cheat-modal {
+                padding: 28px 24px;
+                margin: 0 16px;
+            }
+
+            .cheat-modal .quote {
+                font-size: 17px;
+            }
+
+            .welcome-content {
+                padding: 30px 20px;
+            }
+
+            .welcome-title {
+                font-size: 22px;
+            }
+
+            .welcome-subtitle {
+                font-size: 14px;
+            }
+
+            .welcome-highlight {
+                font-size: 15px;
+            }
+
+            .welcome-btn {
+                padding: 12px 36px;
+                font-size: 16px;
+            }
+
+            .submit-content {
+                padding: 24px 16px;
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 400px) {
+            .question-stem {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+
+            .answer-option label {
+                font-size: 14px;
+                padding: 10px 10px;
+            }
+
+            .question-content {
+                padding: 8px 10px;
+            }
+
+            .image-column, .image-column img {
+                max-height: 30vh;
+            }
+
+            .nav-btn {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+        }
+
         @media print {
             body { background-color: #fff; color: #000; }
             .question-header { display: none; }
